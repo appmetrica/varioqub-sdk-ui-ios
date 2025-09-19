@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '13.0'
   s.source = { :git => "https://github.com/appmetrica/varioqub-sdk-ui-ios.git", :tag=>s.version.to_s }
 
-  s.swift_versions = "5.7"
+  s.swift_versions = "5.8"
   s.pod_target_xcconfig = {
       'APPLICATION_EXTENSION_API_ONLY' => 'YES',
       'DEFINES_MODULE' => 'YES',
@@ -26,8 +26,8 @@ Pod::Spec.new do |s|
       "Sources/VarioqubUI/**/*.swift",
     ]
 
-    core.dependency 'Varioqub', ">= #{s.version}"
-    core.dependency 'DivKit'
+    core.dependency 'Varioqub', "= #{s.version}"
+    core.dependency 'DivKit', '>= 32.9.0'
   end
 
 end

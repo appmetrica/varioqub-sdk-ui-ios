@@ -35,7 +35,7 @@ enum ExternalDependency: CaseIterable {
         switch self {
         case .swiftLog: return .range("1.5.2"..<"2.0.0")
         case .varioqub: return .exact(Version(varioqubCurrentVersion)!)
-        case .divkit: return .range("32.0.0"..<"33.0.0")
+        case .divkit: return .from("32.0.0")
         }
     }
     
@@ -209,6 +209,8 @@ extension Package.Dependency {
             return .package(id: id, exact: v)
         case .range(let r):
             return .package(id: id, r)
+        case .from(let v):
+            return .package(id: id, from: v)
         }
     }
     
@@ -218,6 +220,8 @@ extension Package.Dependency {
             return .package(url: url, exact: v)
         case .range(let r):
             return .package(url: url, r)
+        case .from(let v):
+            return .package(url: url, from: v)
         }
     }
 }
@@ -225,6 +229,7 @@ extension Package.Dependency {
 enum DependencyVersion {
     case exact(Version)
     case range(Range<PackageDescription.Version>)
+    case from(Version)
 }
 
 enum DependencySource {
