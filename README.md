@@ -28,7 +28,7 @@ dependencies: [
 .target(
     name: "YourTargetName",
     dependencies: [
-        .product(name: "Varioqub", package: "varioqub-sdk-ui-ios"),
+        .product(name: "VarioqubUI", package: "varioqub-sdk-ui-ios"),
     ]
 )
 ```
@@ -49,7 +49,7 @@ end
 
 ## Documentation
 
-You can find comprehensive integration details and instructions for installation, configuration, testing, and more in our [full documentation](https://yandex.com/support/varioqub-app/en/sdk/ios/ui-integration).
+You can find comprehensive integration details and instructions for installation, configuration, testing, and more in our [full documentation](https://yandex.com/support/varioqub-app/en/sdk/ios/integration-ui).
 
 ## License
 
