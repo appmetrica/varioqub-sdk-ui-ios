@@ -12,14 +12,18 @@ open class VarioqubUIKitViewApplier: VarioqubWidgetApplicable {
     public let cardId: DivCardID
     private var divView: DivView?
     
+    open var isDebugInfoEnabled: Bool = false
+    
     public init(
         parentView: UIView,
         divComponents: DivKitComponents = DivKitComponents(),
-        cardId: DivCardID = "popup_wrapper"
+        cardId: DivCardID = "popup_wrapper",
+        isDebugInfoEnabled: Bool = false
     ) {
         self.parentView = parentView
         self.divComponents = divComponents
         self.cardId = cardId
+        self.isDebugInfoEnabled = isDebugInfoEnabled
     }
     
     open func setSource(
@@ -31,7 +35,10 @@ open class VarioqubUIKitViewApplier: VarioqubWidgetApplicable {
         divComponents.variablesStorage.append(variables: variables, triggerUpdate: false)
         
         let view = await createDivViewIfNeeded()
-        await view.setSource(.init(kind: .data(data), cardId: cardId))
+        await view.setSource(
+            DivViewSource(kind: .data(data), cardId: cardId),
+            debugParams: DebugParams(isDebugInfoEnabled: isDebugInfoEnabled)
+        )
     }
     
     private func createDivViewIfNeeded() async -> DivView {
