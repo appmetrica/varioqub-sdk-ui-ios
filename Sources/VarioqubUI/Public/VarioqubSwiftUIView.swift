@@ -7,9 +7,11 @@ import VGSLFundamentals
 public struct VarioqubSwiftUIView: View {
     
     @ObservedObject private var viewModel: ViewModel
+    private var isDebugInfoEnabled: Bool
     
-    public init(viewModel: ViewModel) {
+    public init(viewModel: ViewModel, isDebugInfoEnabled: Bool = false) {
         self.viewModel = viewModel
+        self.isDebugInfoEnabled = isDebugInfoEnabled
     }
     
     @ViewBuilder
@@ -17,18 +19,17 @@ public struct VarioqubSwiftUIView: View {
         if let data = viewModel.data {
             DivHostingView(
                 divkitComponents: viewModel.divComponents,
-                source: DivViewSource(kind: .data(data), cardId: viewModel.cardId)
+                source: DivViewSource(kind: .data(data), cardId: viewModel.cardId),
+                debugParams: DebugParams(isDebugInfoEnabled: isDebugInfoEnabled)
             )
         } else {
             EmptyView()
         }
     }
-
     public var body: some View {
         return contentView()
     }
 }
-
 extension VarioqubSwiftUIView {
     
     @MainActor
@@ -56,7 +57,7 @@ extension VarioqubSwiftUIView {
             
             var variables = DivVariables()
             variables["params"] = .dict(params.divKitDictionary)
-            divComponents.variablesStorage.append(variables: variables, triggerUpdate: false)
+            divComponents.variablesStorage.append(variables: variables, triggerUpdate: true)
         }
         
     }

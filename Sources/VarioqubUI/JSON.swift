@@ -110,20 +110,20 @@ extension JSON {
 
 extension JSON {
     
-    var divVariableValue: DivVariableValue? {
+    var divVariableValue: AnyHashable? {
         switch self {
         case .bool(let b):
-            return .bool(b)
+            return AnyHashable(b)
         case .integer(let i):
-            return .integer(i)
+            return AnyHashable(i)
         case .double(let d):
-            return .number(d)
+            return AnyHashable(d)
         case .string(let s):
-            return .string(s)
+            return AnyHashable(s)
         case .array(let a):
-            return .array(a.compactMap(\.divVariableValue))
+            return a.compactMap(\.divVariableValue)
         case .object(let o):
-            return .dict(o.compactMapValues(\.divVariableValue))
+            return o.compactMapValues(\.divVariableValue)
         case .null:
             return nil
         }
