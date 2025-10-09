@@ -2,7 +2,11 @@
 import DivKit
 
 public struct VarioqubUIParams: Equatable {
-    var _values: [String: JSON] = [:]
+    var _values: [String: JSON]
+    
+    public init() {
+        self._values = [:]
+    }
     
     init(_values: [String : JSON]) {
         self._values = _values
@@ -42,6 +46,14 @@ public struct VarioqubUIParams: Equatable {
     
     public func value(for key: String) -> Any? {
         _values[key]?.value
+    }
+    
+    public var keys: Set<String> {
+        Set(_values.keys)
+    }
+    
+    public var values: [String: Any?] {
+        _values.compactMapValues { $0.value }
     }
     
     public mutating func merge(with other: VarioqubUIParams) {

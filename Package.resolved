@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/divkit/divkit-ios",
       "state" : {
-        "revision" : "26c5d4ae596319e877ad583fb87a7df890fb5431",
-        "version" : "32.17.0"
+        "revision" : "bd8958d92517b686d9778cafa88287906c937148",
+        "version" : "32.20.0"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-markdown.git",
       "state" : {
-        "revision" : "704a1218d0e3b5b85a884f1153a065eef7e8d4c2",
-        "version" : "0.7.0"
+        "revision" : "ea79e83c8744d2b50b0dc2d5bbd1e857e1253bf9",
+        "version" : "0.6.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/appmetrica/varioqub-sdk-ios",
       "state" : {
-        "revision" : "ee6362cedecb9c490b6c82bbbcd8e61e6858a47e",
-        "version" : "1.0.1"
+        "revision" : "6517a6e39cc02089dff016ac756d1c76d17ffc1b",
+        "version" : "1.1.1"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/yandex/vgsl.git",
       "state" : {
-        "revision" : "c0e3865a47da9502e01de64aca0eda44a5ca16e3",
-        "version" : "7.9.1"
+        "revision" : "4b531eadfeb7f117825e38785f71718942c1ebc5",
+        "version" : "7.9.3"
       }
     }
   ],
