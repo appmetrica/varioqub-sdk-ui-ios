@@ -18,7 +18,7 @@ enum VarioqubTarget: String, CaseIterable {
 
 enum VarioqubProduct: String, CaseIterable {
     case ui = "VarioqubUI"
-    
+
     var targets: [VarioqubTarget] {
         switch self {
         case .ui: return [.ui]
@@ -30,7 +30,7 @@ enum ExternalDependency: CaseIterable {
     case swiftLog
     case varioqub
     case divkit
-    
+
     var version: DependencyVersion {
         switch self {
         case .swiftLog: return .range("1.5.2"..<"2.0.0")
@@ -38,7 +38,7 @@ enum ExternalDependency: CaseIterable {
         case .divkit: return .from("32.0.0")
         }
     }
-    
+
     var regularPackageName: String {
         switch self {
         case .swiftLog: return "swift-log"
@@ -46,7 +46,7 @@ enum ExternalDependency: CaseIterable {
         case .divkit: return "divkit-ios"
         }
     }
-    
+
     var localPackageName: String {
         switch self {
         case .swiftLog: return "\(spmExternalScope).swift-log"
@@ -54,7 +54,7 @@ enum ExternalDependency: CaseIterable {
         case .divkit: return "\(divkitScope).DivKit"
         }
     }
-    
+
     var spmExternalPackageName: String {
         switch self {
         case .swiftLog: return "\(spmExternalScope).swift-log"
@@ -62,7 +62,7 @@ enum ExternalDependency: CaseIterable {
         case .divkit: return "\(divkitScope).DivKit"
         }
     }
-    
+
     var regularPackageDependency: Package.Dependency {
         switch self {
         case .swiftLog: return .package(url: "https://github.com/apple/swift-log", version: version)
@@ -70,7 +70,7 @@ enum ExternalDependency: CaseIterable {
         case .divkit: return .package(url: "https://github.com/divkit/divkit-ios", version: version)
         }
     }
-    
+
     var spmExternalPackageDependency: Package.Dependency {
         switch self {
         case .swiftLog: return .package(id: "\(spmExternalScope).swift-log", version: version)
@@ -78,7 +78,7 @@ enum ExternalDependency: CaseIterable {
         case .divkit: return .package(id: "\(divkitScope).DivKit", version: version)
         }
     }
-    
+
     var localPackageDependency: Package.Dependency {
         switch self {
         case .swiftLog: return .package(id: "\(spmExternalScope).swift-log", version: version)
@@ -92,7 +92,7 @@ enum ExternalTargetDependency: String, CaseIterable {
     case swiftLog = "Logging"
     case varioqub = "Varioqub"
     case divkit = "DivKit"
-    
+
     var package: ExternalDependency {
         switch self {
         case .swiftLog: return .swiftLog
@@ -100,7 +100,7 @@ enum ExternalTargetDependency: String, CaseIterable {
         case .divkit: return .divkit
         }
     }
-    
+
     var targetDependency: Target.Dependency {
         .product(name: rawValue, package: package.packageName)
     }
@@ -165,7 +165,7 @@ extension ExternalDependency {
 }
 
 extension Target {
-    
+
     static func target(
         varioqubTarget: VarioqubTarget,
         resources: [Resource]? = nil,
@@ -185,7 +185,7 @@ extension Target {
             swiftSettings: swiftCompilerSettings
         )
     }
-    
+
     static func testTarget(
         varioqubTarget: VarioqubTarget,
         dependencies: [VarioqubTarget] = [],
@@ -199,7 +199,7 @@ extension Target {
             swiftSettings: swiftCompilerSettings
         )
     }
-    
+
 }
 
 extension Package.Dependency {
@@ -213,7 +213,7 @@ extension Package.Dependency {
             return .package(id: id, from: v)
         }
     }
-    
+
     static func package(url: String, version: DependencyVersion) -> Package.Dependency {
         switch version {
         case .exact(let v):
