@@ -1,239 +1,169 @@
-// swift-tools-version:5.7
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version:5.8
 
 import PackageDescription
+import Foundation
 
-let usedSource: DependencySource = .regular
-let varioqubCurrentVersion = "1.3.0"
-let spmExternalScope = "spm-external"
-let divkitScope = "yandexsuperapp"
+// MARK: - Dependencies
 
-let swiftCompilerSettings: [SwiftSetting] = [
-    .define("VQ_MODULES"),
-]
-
-enum VarioqubTarget: String, CaseIterable {
-    case ui = "VarioqubUI"
+func hasFile(_ path: String) -> Bool {
+    FileManager.default.fileExists(
+        atPath: URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .appendingPathComponent(path)
+            .path
+    )
 }
 
-enum VarioqubProduct: String, CaseIterable {
-    case ui = "VarioqubUI"
+// DO NOT CHANGE DEFAULT VALUES IN TRUNK
+let useRegistry = hasFile(".spm-use-registry") || false
+let useVarioqubLocal = hasFile(".spm-use-varioqub-local") || false
 
-    var targets: [VarioqubTarget] {
-        switch self {
-        case .ui: return [.ui]
-        }
-    }
-}
+let varioqubCurrentVersion: Version = "1.3.0"
 
-enum ExternalDependency: CaseIterable {
-    case swiftLog
-    case varioqub
-    case divkit
+struct ExternalDependency {
+    let package: String
+    let dependency: Package.Dependency
 
-    var version: DependencyVersion {
-        switch self {
-        case .swiftLog: return .range("1.5.2"..<"2.0.0")
-        case .varioqub: return .exact(Version(varioqubCurrentVersion)!)
-        case .divkit: return .from("32.0.0")
-        }
-    }
-
-    var regularPackageName: String {
-        switch self {
-        case .swiftLog: return "swift-log"
-        case .varioqub: return "varioqub-sdk-ios"
-        case .divkit: return "divkit-ios"
-        }
-    }
-
-    var localPackageName: String {
-        switch self {
-        case .swiftLog: return "\(spmExternalScope).swift-log"
-        case .varioqub: return "varioqub"
-        case .divkit: return "\(divkitScope).DivKit"
+    init(url: String, registryId: String, version: VersionSpec, localPath: String? = nil) {
+        if localPath != nil {
+            self.package = registryId
+            self.dependency = .package(name: self.package, path: localPath!)
+        } else if useRegistry {
+            self.package = registryId
+            self.dependency = switch version {
+            case .upToNextMajor(from: let from): .package(id: self.package, .upToNextMajor(from: from))
+            case .exact(let v): .package(id: self.package, exact: v)
+            }
+        } else {
+            self.package = URL(string: url)!.lastPathComponent
+            self.dependency = switch version {
+            case .upToNextMajor(from: let from): .package(url: url, .upToNextMajor(from: from))
+            case .exact(let v): .package(url: url, exact: v)
+            }
         }
     }
 
-    var spmExternalPackageName: String {
-        switch self {
-        case .swiftLog: return "\(spmExternalScope).swift-log"
-        case .varioqub: return "\(spmExternalScope).varioqub"
-        case .divkit: return "\(divkitScope).DivKit"
-        }
-    }
-
-    var regularPackageDependency: Package.Dependency {
-        switch self {
-        case .swiftLog: return .package(url: "https://github.com/apple/swift-log", version: version)
-        case .varioqub: return .package(url: "https://github.com/appmetrica/varioqub-sdk-ios", version: version)
-        case .divkit: return .package(url: "https://github.com/divkit/divkit-ios", version: version)
-        }
-    }
-
-    var spmExternalPackageDependency: Package.Dependency {
-        switch self {
-        case .swiftLog: return .package(id: "\(spmExternalScope).swift-log", version: version)
-        case .varioqub: return .package(id: "\(spmExternalScope).Varioqub", version: version)
-        case .divkit: return .package(id: "\(divkitScope).DivKit", version: version)
-        }
-    }
-
-    var localPackageDependency: Package.Dependency {
-        switch self {
-        case .swiftLog: return .package(id: "\(spmExternalScope).swift-log", version: version)
-        case .varioqub: return .package(name: "varioqub", path: "../varioqub")
-        case .divkit: return .package(id: "\(divkitScope).DivKit", version: version)
-        }
+    enum VersionSpec {
+        case upToNextMajor(from: Version)
+        case exact(Version)
     }
 }
 
-enum ExternalTargetDependency: String, CaseIterable {
-    case swiftLog = "Logging"
-    case varioqub = "Varioqub"
-    case divkit = "DivKit"
+enum SwiftLog {
+    private static let dep = ExternalDependency(
+        url: "https://github.com/apple/swift-log",
+        registryId: "spm-external.swift-log",
+        version: .upToNextMajor(from: "1.5.2"),
+    )
 
-    var package: ExternalDependency {
-        switch self {
-        case .swiftLog: return .swiftLog
-        case .varioqub: return .varioqub
-        case .divkit: return .divkit
-        }
+    static let dependency: Package.Dependency = dep.dependency
+    static let logging: Target.Dependency = .product(name: "Logging", package: dep.package)
+}
+
+enum Varioqub {
+    private static let dep = ExternalDependency(
+        url: "https://github.com/appmetrica/varioqub-sdk-ios",
+        registryId: "spm-external.Varioqub",
+        version: .exact(varioqubCurrentVersion),
+        localPath: useVarioqubLocal ? "../varioqub" : nil,
+    )
+
+    static let dependency: Package.Dependency = dep.dependency
+    static let varioqub: Target.Dependency = .product(name: "Varioqub", package: dep.package)
+}
+
+enum DivKit {
+    private static let dep = ExternalDependency(
+        url: "https://github.com/divkit/divkit-ios",
+        registryId: "yandexsuperapp.DivKit",
+        version: .upToNextMajor(from: "32.0.0"),
+    )
+
+    static let dependency: Package.Dependency = dep.dependency
+    static let divkit: Target.Dependency = .product(name: "DivKit", package: dep.package)
+}
+
+// MARK: - Module
+
+protocol ModuleDependency {
+    var asTargetDependency: Target.Dependency { get }
+}
+
+extension String : ModuleDependency {
+    var asTargetDependency: Target.Dependency { .target(name: self) }
+}
+
+extension Target.Dependency : ModuleDependency {
+    var asTargetDependency: Target.Dependency { self }
+}
+
+struct Module {
+    let name: String
+    let dependencies: [Target.Dependency]
+    let hasTests: Bool
+    let testDependencies: [Target.Dependency]
+
+    init(name: String, dependencies: [ModuleDependency], hasTests: Bool = true, testDependencies: [ModuleDependency] = []) {
+        self.name = name
+        self.dependencies = dependencies.map(\.asTargetDependency)
+        self.hasTests = hasTests
+        self.testDependencies = testDependencies.map(\.asTargetDependency)
     }
 
-    var targetDependency: Target.Dependency {
-        .product(name: rawValue, package: package.packageName)
+    func toTargets() -> [Target] {
+        var targets: [Target] = [
+            .target(
+                name: name,
+                dependencies: dependencies,
+                resources: [.copy("Resources/PrivacyInfo.xcprivacy")],
+                swiftSettings: [.define("VQ_MODULES")],
+            )
+        ]
+        if hasTests {
+            targets.append(
+                .testTarget(
+                    name: "\(name)Tests",
+                    dependencies: [.target(name: name)] + dependencies + testDependencies,
+                    swiftSettings: [.define("VQ_MODULES")],
+                )
+            )
+        }
+        return targets
     }
 }
 
-let targets: [Target] = [
-    .target(varioqubTarget: .ui, externalDependencies: [.swiftLog, .varioqub, .divkit]),
-    .testTarget(varioqubTarget: .ui),
-]
+extension Module {
+    static let ui = "VarioqubUI"
+}
 
-let package = Package(
-        name: "VarioqubUI",
-        platforms: [
-            .iOS(.v13),
-            .tvOS(.v13),
-        ],
-        products: VarioqubProduct.allCases.map(\.product),
-        dependencies: ExternalDependency.allCases.map(\.packageDependency),
-        targets: targets
+// MARK: - UI Module
+
+let ui = Module(
+    name: Module.ui,
+    dependencies: [
+        SwiftLog.logging,
+        Varioqub.varioqub,
+        DivKit.divkit,
+    ],
 )
 
-extension VarioqubTarget {
-    var name: String { rawValue }
-    var testsName: String { rawValue + "Tests" }
-    var path: String { "Sources/\(rawValue)" }
-    var testsPath: String { "Tests/\(rawValue)Tests" }
-    var dependency: Target.Dependency { .target(name: rawValue) }
-}
+// MARK: - Package definition
 
-extension VarioqubProduct {
-    var product: Product {
-        .library(
-            name: rawValue,
-            targets: targets.map(\.name)
-        )
-    }
-}
-
-extension ExternalDependency {
-
-    var packageName: String {
-        switch usedSource {
-        case .local:
-            return localPackageName
-        case .regular:
-            return regularPackageName
-        case .spmExternal:
-            return spmExternalPackageName
-        }
-    }
-
-    var packageDependency: Package.Dependency {
-        switch usedSource {
-        case .local:
-            return localPackageDependency
-        case .regular:
-            return regularPackageDependency
-        case .spmExternal:
-            return spmExternalPackageDependency
-        }
-    }
-}
-
-extension Target {
-
-    static func target(
-        varioqubTarget: VarioqubTarget,
-        resources: [Resource]? = nil,
-        dependencies: [VarioqubTarget] = [],
-        externalDependencies: [ExternalTargetDependency] = [],
-        includePrivacyManifest: Bool = true
-    ) -> Target {
-        var res: [Resource] = resources ?? []
-        if includePrivacyManifest {
-            res.append(.copy("Resources/PrivacyInfo.xcprivacy"))
-        }
-        return .target(
-            name: varioqubTarget.name,
-            dependencies: dependencies.map(\.dependency) + externalDependencies.map(\.targetDependency),
-            path: varioqubTarget.path,
-            resources: res,
-            swiftSettings: swiftCompilerSettings
-        )
-    }
-
-    static func testTarget(
-        varioqubTarget: VarioqubTarget,
-        dependencies: [VarioqubTarget] = [],
-        externalDependencies: [ExternalTargetDependency] = []
-    ) -> Target {
-        let allDeps = [varioqubTarget.dependency] + dependencies.map(\.dependency) + externalDependencies.map(\.targetDependency)
-        return .testTarget(
-            name: varioqubTarget.testsName,
-            dependencies: allDeps,
-            path: varioqubTarget.testsPath,
-            swiftSettings: swiftCompilerSettings
-        )
-    }
-
-}
-
-extension Package.Dependency {
-    static func package(id: String, version: DependencyVersion) -> Package.Dependency {
-        switch version {
-        case .exact(let v):
-            return .package(id: id, exact: v)
-        case .range(let r):
-            return .package(id: id, r)
-        case .from(let v):
-            return .package(id: id, from: v)
-        }
-    }
-
-    static func package(url: String, version: DependencyVersion) -> Package.Dependency {
-        switch version {
-        case .exact(let v):
-            return .package(url: url, exact: v)
-        case .range(let r):
-            return .package(url: url, r)
-        case .from(let v):
-            return .package(url: url, from: v)
-        }
-    }
-}
-
-enum DependencyVersion {
-    case exact(Version)
-    case range(Range<PackageDescription.Version>)
-    case from(Version)
-}
-
-enum DependencySource {
-    case local
-    case regular
-    case spmExternal
-}
+let package = Package(
+    name: "VarioqubUI",
+    platforms: [
+        .iOS(.v13),
+        .tvOS(.v13),
+    ],
+    products: [
+        .library(name: "VarioqubUI", targets: [Module.ui]),
+    ],
+    dependencies: [
+        SwiftLog.dependency,
+        Varioqub.dependency,
+        DivKit.dependency,
+    ],
+    targets: [
+        ui,
+    ].flatMap { $0.toTargets() },
+)
